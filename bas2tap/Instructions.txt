@@ -1,0 +1,9 @@
+WINDOWS:
+   .\bas2tap.exe -a10 -sgo_game test_go15.txt Lewis_go_baduk.tap
+
+LINUX / MACOS:
+   1. Compile the tool (only needs to be done once):
+      sh build.sh
+
+   2. Create the TAP file:
+      ./bas2tap -a10 -sgo_game test_go15.txt Lewis_go_baduk.tap

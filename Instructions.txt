@@ -1,6 +1,0 @@
-.\bas2tap.exe -a10 -sgo_game test_go15.txt Lewis_go_baduk.tap
-
-Playable Go (Baduk) for the ZX Spectrum, two-player classic board game. With logic for capturing stones, and end of game scoring (Japanese rules). Recommend speeding up the system, as it takes longer to place down a stone as the game progresses, but only a second or so when sped up.
-
-To play: Just type in your move coordinates. 
-To end the game: Both players must pass (p)
