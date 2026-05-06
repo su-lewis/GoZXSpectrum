@@ -1,266 +1,164 @@
-50 BORDER 0: PAPER 7: INK 0: CLS
-55 CLEAR
+10 GO SUB 9000: REM Initialize UDGs
+50 BORDER 0: PAPER 7: INK 0: CLS 
+55 CLEAR 
 60 LET bSize = 9
-70 DIM b(9, 9)
-80 DIM v(9, 9)
-90 DIM q(81)
-100 DIM w(81)
-105 DIM l(81)
-107 DIM t(81)
-110 LET p = 1
-120 LET j = 0: LET k = 0
-130 LET blackCaps = 0
-140 LET whiteCaps = 0
-150 LET z = 0
-160 LET g = 0
-180 LET koX = 0: LET koY = 0 : LET koTurn = 0
+70 DIM b(9, 9): DIM v(9, 9)
+90 DIM q(81): DIM w(81): DIM l(81): DIM t(81)
+110 LET p = 1: LET j = 0: LET k = 0
+130 LET blackCaps = 0: LET whiteCaps = 0
+150 LET z = 0: LET g = 0: LET curGen = 1
+180 LET koX = 0: LET koY = 0: LET koTurn = 0
 195 LET lastRemovedX = 0: LET lastRemovedY = 0
-200 GO SUB 1000
-210 GO SUB 2000
+200 GO SUB 1000: REM Draw Board
+210 GO SUB 2000: REM Status Bar
+
 310 IF g THEN GO TO 5000
-320 PRINT AT 21,0; "Move (e.g. E5, P=Pass):       "; AT 21,25;
-330 LET m$ = ""
-335 LET i = 0
-340 LET k$ = INKEY$
-345 IF k$ = "" THEN GO TO 340
+320 PRINT AT 21,0; "Move (e.g. E5, P=Pass):         "; AT 21,25;
+330 LET m$ = "": LET i = 0
+340 LET k$ = INKEY$: IF k$ = "" THEN GO TO 340
 350 IF k$ = "p" OR k$ = "P" THEN GO SUB 800: GO TO 310
-355 IF k$ = CHR$(12) THEN GO SUB 950: GO TO 340
-360 IF i <> 0 THEN GO TO 366
-362 IF k$ >= "a" AND k$ <= "j" THEN LET k$ = CHR$( CODE k$ - 32 )
-363 IF (k$ < "A" OR k$ > "J") OR k$ = "I" THEN BEEP 0.05, -20 : GO TO 340
-366 IF i = 1 AND (k$ < "1" OR k$ > "9") THEN BEEP 0.05, -20 : GO TO 340
-375 LET m$ = m$ + k$
-380 PRINT k$;
-385 LET i = i + 1
+355 IF k$ = CHR$(12) THEN GO SUB 950: GO TO 340: REM Delete/Backspace
+360 IF i = 0 THEN IF k$ >= "a" AND k$ <= "z" THEN LET k$ = CHR$( CODE k$ - 32 )
+363 IF i = 0 AND (k$ < "A" OR k$ > "J" OR k$ = "I") THEN BEEP 0.05, -20 : GO TO 340
+366 IF i > 0 AND (k$ < "1" OR k$ > "9") THEN BEEP 0.05, -20 : GO TO 340
+375 LET m$ = m$ + k$: PRINT k$;: LET i = i + 1
 390 IF i < 2 THEN GO TO 340
 405 LET tempX = CODE m$(1) - CODE "A" + 1
 415 IF CODE m$(1) > CODE "I" THEN LET tempX = tempX - 1
-420 LET tempY = VAL m$(2)
+420 LET tempY = VAL m$(2 TO )
 430 IF tempX < 1 OR tempX > bSize OR tempY < 1 OR tempY > bSize THEN GO TO 455
-440 LET j = tempX: LET k = tempY
-445 GO SUB 500
-447 GO TO 310
-455 BEEP 0.1, -10: PRINT AT 21,0; "Invalid format! Try again.      ";
-460 PAUSE 75
-465 GO TO 310
-510 IF b(j, k) <> 0 THEN BEEP 0.05, 0: PRINT AT 21,0;"That spot is already occupied! ";: PAUSE 50: RETURN
-520 IF j = koX AND k = koY AND p = koTurn THEN BEEP 0.05, 0: PRINT AT 21,0;"Ko violation! Invalid move.   ";: PAUSE 50: RETURN
-540 LET b(j, k) = p
-545 GO SUB 1500
-550 LET o = 3 - p
-560 LET c = 0
+440 LET j = tempX: LET k = tempY: GO SUB 500: GO TO 310
+455 BEEP 0.1, -10: PRINT AT 21,0; "Invalid! Try again.           ";: PAUSE 50: GO TO 310
+
+510 IF b(j, k) <> 0 THEN BEEP 0.05, 0: PRINT AT 21,0;"Occupied!                     ";: PAUSE 50: RETURN
+520 IF j = koX AND k = koY AND p = koTurn THEN BEEP 0.05, 0: PRINT AT 21,0;"Ko violation!                 ";: PAUSE 50: RETURN
+540 LET b(j, k) = p: GO SUB 1500
+550 LET o = 3 - p: LET c = 0
 590 FOR d = -1 TO 1 STEP 2
 600 LET n = j + d: LET a = k
-605 IF n < 1 OR n > bSize THEN GO TO 635
-606 IF a < 1 OR a > bSize THEN GO TO 635
+605 IF n < 1 OR n > bSize OR a < 1 OR a > bSize THEN GO TO 635
 607 IF b(n, a) <> o THEN GO TO 635
-610 LET e = o : GO SUB 3000
+610 LET e = o: GO SUB 3000
 615 IF h THEN GO TO 635
-620 LET r = n : LET u = a
-625 GO SUB 4000
-630 LET c = c + s
+620 LET r = n : LET u = a: GO SUB 4000: LET c = c + s
 635 NEXT d
 640 FOR d = -1 TO 1 STEP 2
 650 LET n = j: LET a = k + d
-655 IF n < 1 OR n > bSize THEN GO TO 682
-656 IF a < 1 OR a > bSize THEN GO TO 682
+655 IF n < 1 OR n > bSize OR a < 1 OR a > bSize THEN GO TO 682
 657 IF b(n, a) <> o THEN GO TO 682
-660 LET e = o : GO SUB 3000
+660 LET e = o: GO SUB 3000
 665 IF h THEN GO TO 682
-670 LET r = n : LET u = a
-675 GO SUB 4000
-680 LET c = c + s
+670 LET r = n : LET u = a: GO SUB 4000: LET c = c + s
 682 NEXT d
 695 IF c > 0 THEN GO TO 770
-705 LET e = p : LET n = j : LET a = k
-710 GO SUB 3000
+705 LET e = p: LET n = j: LET a = k: GO SUB 3000
 720 IF h THEN GO TO 770
-730 BEEP 0.1, -5 : PRINT AT 21,0;"Suicide move is not allowed!   ";
-735 PAUSE 50
-740 LET b(j, k) = 0
-745 GO SUB 1500
-750 RETURN
+730 BEEP 0.1, -5: PRINT AT 21,0;"Suicide move!                 ";: PAUSE 50
+740 LET b(j, k) = 0: GO SUB 1500: RETURN
 770 IF p = 1 THEN LET blackCaps = blackCaps + c
 772 IF p = 2 THEN LET whiteCaps = whiteCaps + c
-775 IF c <> 1 THEN LET koX = 0 : LET koY = 0 : LET koTurn = 0 : GO TO 785
+775 IF c <> 1 THEN LET koX = 0 : LET koY = 0: GO TO 785
 780 LET koX = lastRemovedX : LET koY = lastRemovedY : LET koTurn = 3 - p
-785 LET z = 0
-790 LET p = 3 - p
-792 GO SUB 2000
-799 RETURN
-810 PRINT AT 21,0;"Player ";p;" passes.              ";: PAUSE 50
-820 LET z = z + 1
-830 LET koX = 0 : LET koY = 0 : LET koTurn = 0
-840 IF z < 2 THEN GO TO 890
-850 LET g = 1
-860 PRINT AT 21,0;"Two passes. Game Over!         "
-870 PAUSE 100
-880 RETURN
-890 LET p = 3 - p
-900 GO SUB 2000
-920 RETURN
+785 LET z = 0: LET p = 3 - p: GO SUB 2000: RETURN
+
+810 PRINT AT 21,0;"Player ";p;" passes.             ";: PAUSE 50
+820 LET z = z + 1: LET koX = 0: IF z >= 2 THEN LET g = 1: RETURN
+890 LET p = 3 - p: GO SUB 2000: RETURN
+
 955 IF i = 0 THEN RETURN
-960 LET i = i - 1
-965 LET m$ = m$( TO i)
-970 PRINT CHR$(8);" ";CHR$(8);
-975 RETURN
-1010 CLS
-1020 PRINT AT 0,0; "Lewis Go (Baduk 9x9)"
-1030 LET f = 2
-1040 LET yOffset = 2
-1050 FOR x = 1 TO bSize
-1055 LET c$ = CHR$(CODE("A")+x-1)
-1056 IF x > 8 THEN LET c$ = CHR$(CODE("A")+x)
-1060 PRINT AT yOffset, x * 3 + f - 2; c$;
-1065 NEXT x
-1070 FOR y = 1 TO bSize
-1075 PRINT AT y * 2 + yOffset, f-1; y;
-1080 FOR x = 1 TO bSize
-1085 PRINT AT y * 2 + yOffset, x * 3 + f - 2; "+";
+960 LET i = i - 1: LET m$ = m$( TO i): PRINT CHR$(8);" ";CHR$(8);: RETURN
+
+1010 CLS: PRINT AT 0,0; "Lewis Go (Baduk 9x9)"
+1030 LET f = 2: LET yOffset = 2
+1050 FOR x = 1 TO bSize: LET c$ = CHR$(CODE("A")+x-1): IF x > 8 THEN LET c$ = CHR$(CODE("A")+x)
+1060 PRINT AT yOffset, x * 3 + f - 2; c$;: NEXT x
+1070 FOR y = 1 TO bSize: PRINT AT y * 2 + yOffset, f-1; y;
+1080 FOR x = 1 TO bSize: PRINT AT y * 2 + yOffset, x * 3 + f - 2; "+";
 1086 IF x < bSize THEN PRINT "--";
 1090 IF y < bSize THEN PRINT AT y * 2 + yOffset + 1, x * 3 + f - 2; "|";
-1095 LET b(x, y) = 0
-1100 NEXT x
-1105 NEXT y
-1110 RETURN
-1510 LET screenX = j * 3 + f - 2
-1520 LET screenY = k * 2 + yOffset
+1095 LET b(x, y) = 0: NEXT x: NEXT y: RETURN
+
+1510 LET screenX = j * 3 + f - 2: LET screenY = k * 2 + yOffset
 1540 IF b(j,k) = 0 THEN PRINT AT screenY, screenX; PAPER 7; INK 0; "+";: IF j < bSize THEN PRINT "--";: RETURN
-1550 IF b(j,k) = 1 THEN PRINT AT screenY, screenX; PAPER 0; INK 7; "O";: IF j < bSize THEN PRINT PAPER 7; INK 0; "--";: RETURN
-1560 IF b(j,k) = 2 THEN PRINT AT screenY, screenX; BRIGHT 1; PAPER 7; INK 0; "O";: PRINT BRIGHT 0;: IF j < bSize THEN PRINT PAPER 7; INK 0; "--";: RETURN
+1550 IF b(j,k) = 1 THEN PRINT AT screenY, screenX; PAPER 7; INK 0; CHR$ 144;: IF j < bSize THEN PRINT "--";: RETURN
+1560 IF b(j,k) = 2 THEN PRINT AT screenY, screenX; PAPER 7; INK 1; CHR$ 144;: IF j < bSize THEN PRINT "--";: RETURN
 1570 RETURN
-2010 PRINT AT 1,0; "Captures:B:";blackCaps;" W:";whiteCaps;" ";
-2020 PRINT AT 1,18;"              ";
-2030 IF p = 1 THEN PRINT AT 1,18; INK 0;"Black to Play";
-2040 IF p = 2 THEN PRINT AT 1,18; INK 0;"White to Play";
-2050 PRINT INK 0;
-2060 RETURN
-3010 LET h = 0
-3020 LET stackPtr = 0
-3030 FOR y = 1 TO bSize: FOR x = 1 TO bSize: LET v(x, y) = 0: NEXT x: NEXT y
+
+2010 PRINT AT 1,0; "B:";blackCaps;" W:";whiteCaps;"  ";
+2030 IF p = 1 THEN PRINT AT 1,18; INK 0; BRIGHT 1; "Black's Turn";
+2040 IF p = 2 THEN PRINT AT 1,18; INK 1; BRIGHT 1; "White's Turn";
+2050 PRINT BRIGHT 0; INK 0; : RETURN
+
+3010 LET h = 0: LET stackPtr = 0: LET curGen = curGen + 1
 3040 IF n < 1 OR n > bSize OR a < 1 OR a > bSize THEN RETURN
 3050 IF b(n, a) <> e THEN RETURN
-3060 LET stackPtr = stackPtr + 1
-3070 LET q(stackPtr) = n: LET w(stackPtr) = a
-3080 LET v(n, a) = 1
+3060 LET stackPtr = 1: LET q(1) = n: LET w(1) = a: LET v(n, a) = curGen
 3100 IF stackPtr = 0 THEN RETURN
-3110 LET currentX = q(stackPtr)
-3120 LET currentY = w(stackPtr)
-3130 LET stackPtr = stackPtr - 1
-3150 FOR d = -1 TO 1 STEP 2
-3160 LET nextX = currentX + d: LET nextY = currentY
-3170 GO SUB 3500
-3180 LET nextX = currentX: LET nextY = currentY + d
-3190 GO SUB 3500
-3200 NEXT d
-3210 GO TO 3100
+3110 LET currentX = q(stackPtr): LET currentY = w(stackPtr): LET stackPtr = stackPtr - 1
+3150 FOR d = -1 TO 1 STEP 2: LET nextX = currentX + d: LET nextY = currentY: GO SUB 3500
+3180 IF h THEN LET stackPtr = 0: RETURN
+3185 LET nextX = currentX: LET nextY = currentY + d: GO SUB 3500
+3190 IF h THEN LET stackPtr = 0: RETURN
+3200 NEXT d: GO TO 3100
 3510 IF nextX < 1 OR nextX > bSize OR nextY < 1 OR nextY > bSize THEN RETURN
-3520 IF v(nextX, nextY) <> 0 THEN RETURN
+3520 IF v(nextX, nextY) = curGen THEN RETURN
 3540 IF b(nextX, nextY) = 0 THEN LET h = 1: RETURN
-3560 IF b(nextX, nextY) = e THEN GO TO 3590
+3560 IF b(nextX, nextY) = e THEN LET v(nextX, nextY) = curGen: LET stackPtr = stackPtr + 1: LET q(stackPtr) = nextX: LET w(stackPtr) = nextY
 3580 RETURN
-3600 LET v(nextX, nextY) = 1
-3610 LET stackPtr = stackPtr + 1
-3620 IF stackPtr > 81 THEN PRINT AT 21,0;"Stack overflow Lib!": STOP
-3630 LET q(stackPtr) = nextX: LET w(stackPtr) = nextY
-3640 RETURN
-4030 LET s = 0
-4040 LET stackPtr = 0
-4050 LET groupPlayer = b(r, u)
-4055 IF groupPlayer = 0 THEN RETURN
-4060 FOR y = 1 TO bSize: FOR x = 1 TO bSize: LET v(x, y) = 0: NEXT x: NEXT y
-4085 IF r<1 OR r>bSize OR u<1 OR u>bSize THEN RETURN
-4090 LET stackPtr = stackPtr + 1
-4100 LET q(stackPtr) = r: LET w(stackPtr) = u
-4110 LET v(r, u) = 1
+
+4030 LET s = 0: LET stackPtr = 1: LET groupPlayer = b(r, u): LET curGen = curGen + 1
+4090 LET q(1) = r: LET w(1) = u: LET v(r, u) = curGen
 4130 IF stackPtr = 0 THEN RETURN
-4150 LET currentX = q(stackPtr)
-4160 LET currentY = w(stackPtr)
-4170 LET stackPtr = stackPtr - 1
+4150 LET currentX = q(stackPtr): LET currentY = w(stackPtr): LET stackPtr = stackPtr - 1
 4190 IF b(currentX, currentY) <> groupPlayer THEN GO TO 4250
-4200 LET b(currentX, currentY) = 0
-4210 LET s = s + 1
-4215 LET lastRemovedX = currentX : LET lastRemovedY = currentY
-4220 LET screenX = currentX * 3 + f - 2
-4222 LET screenY = currentY * 2 + yOffset
-4224 PRINT AT screenY, screenX; INK 0;"+--";
-4250 FOR d = -1 TO 1 STEP 2
-4260 LET nextX = currentX + d: LET nextY = currentY
-4270 GO SUB 4500
-4280 NEXT d
-4290 FOR d = -1 TO 1 STEP 2
-4300 LET nextX = currentX: LET nextY = currentY + d
-4310 GO SUB 4500
-4320 NEXT d
-4330 GO TO 4130
+4200 LET b(currentX, currentY) = 0: LET s = s + 1: LET lastRemovedX = currentX : LET lastRemovedY = currentY
+4220 LET screenX = currentX * 3 + f - 2: LET screenY = currentY * 2 + yOffset
+4224 PRINT AT screenY, screenX; INK 0;"+";: IF currentX < bSize THEN PRINT "--";
+4250 FOR d = -1 TO 1 STEP 2: LET nextX = currentX + d: LET nextY = currentY: GO SUB 4500
+4280 LET nextX = currentX: LET nextY = currentY + d: GO SUB 4500
+4300 NEXT d: GO TO 4130
 4520 IF nextX < 1 OR nextX > bSize OR nextY < 1 OR nextY > bSize THEN RETURN
-4530 IF b(nextX, nextY) <> groupPlayer OR v(nextX, nextY) <> 0 THEN RETURN
-4540 LET v(nextX, nextY) = 1
-4550 LET stackPtr = stackPtr + 1
-4560 IF stackPtr <= 81 THEN GO TO 4570
-4565 PRINT AT 21,0;"Stack overflow Rem!"
-4568 STOP
-4570 LET q(stackPtr) = nextX: LET w(stackPtr) = nextY
+4530 IF b(nextX, nextY) = groupPlayer AND v(nextX, nextY) <> curGen THEN LET v(nextX, nextY) = curGen: LET stackPtr = stackPtr + 1: LET q(stackPtr) = nextX: LET w(stackPtr) = nextY
 4590 RETURN
-5010 LET blackTerritory = 0
-5020 LET whiteTerritory = 0
-5030 PRINT AT 21,0; "Scoring... Please wait.      ";
+
+5010 LET blackTerritory = 0: LET whiteTerritory = 0: PRINT AT 21,0; "Scoring... Please wait.       ";
 5040 GO SUB 7000
-5050 LET bScore = blackTerritory + blackCaps
-5060 LET wScore = whiteTerritory + whiteCaps
-5080 PRINT AT 1,18; PAPER 7; BRIGHT 0; "              ";
-5100 IF bScore > wScore THEN PRINT AT 1,18; BRIGHT 1; PAPER 0; INK 7; "Black wins!";
-5110 IF wScore > bScore THEN PRINT AT 1,18; BRIGHT 1; PAPER 7; INK 0; "White wins!";
-5120 IF bScore = wScore THEN PRINT AT 1,18; BRIGHT 1; PAPER 6; INK 0; "Draw!";
-5135 PRINT BRIGHT 0; PAPER 7; INK 0;
+5050 LET bScore = blackTerritory + blackCaps: LET wScore = whiteTerritory + whiteCaps
+5080 PRINT AT 1,18; "              ";
+5100 IF bScore > wScore THEN PRINT AT 1,18; BRIGHT 1; "Black wins!";
+5110 IF wScore > bScore THEN PRINT AT 1,18; BRIGHT 1; "White wins!";
 5150 PRINT AT 19,0; "--------------------------------"
-5160 PRINT AT 20,0; "B: ";blackTerritory;" territory + ";blackCaps;" captures = ";bScore;"  "
-5170 PRINT AT 21,0; "W: ";whiteTerritory;" territory + ";whiteCaps;" captures = ";wScore;"  "
-5180 PRINT AT 21,25; "Press any key."
-5190 IF INKEY$ = "" THEN GO TO 5190
+5160 PRINT AT 20,0; "B: ";blackTerritory;"+";blackCaps;"=";bScore;"  W: ";whiteTerritory;"+";whiteCaps;"=";wScore
+5180 IF INKEY$ = "" THEN GO TO 5180
 5200 STOP
-7010 FOR y = 1 TO bSize: FOR x = 1 TO bSize: LET v(x, y) = 0: NEXT x: NEXT y
-7020 FOR k = 1 TO bSize
-7030 FOR j = 1 TO bSize
-7040 IF b(j, k) = 0 AND v(j, k) = 0 THEN GO SUB 7500
-7050 NEXT j
-7060 NEXT k
-7070 RETURN
-7510 LET regionSize = 0
-7520 LET touchesBlack = 0
-7530 LET touchesWhite = 0
-7540 LET stackPtr = 1
-7550 LET q(1) = j: LET w(1) = k
-7560 LET v(j, k) = 1
+
+7010 LET curGen = curGen + 1
+7020 FOR k = 1 TO bSize: FOR j = 1 TO bSize
+7040 IF b(j, k) = 0 AND v(j, k) <> curGen THEN GO SUB 7500
+7050 NEXT j: NEXT k: RETURN
+
+7510 LET regionSize = 0: LET touchesBlack = 0: LET touchesWhite = 0: LET stackPtr = 1
+7550 LET q(1) = j: LET w(1) = k: LET v(j, k) = curGen
 7570 IF stackPtr = 0 THEN GO TO 7800
-7580 LET currentX = q(stackPtr)
-7590 LET currentY = w(stackPtr)
-7600 LET stackPtr = stackPtr - 1
-7610 LET regionSize = regionSize + 1
-7620 LET l(regionSize) = currentX: LET t(regionSize) = currentY
+7580 LET currentX = q(stackPtr): LET currentY = w(stackPtr): LET stackPtr = stackPtr - 1
+7610 LET regionSize = regionSize + 1: LET l(regionSize) = currentX: LET t(regionSize) = currentY
 7630 FOR d = -1 TO 1 STEP 2
 7640 LET nextX = currentX + d: LET nextY = currentY: GO SUB 7700
 7650 LET nextX = currentX: LET nextY = currentY + d: GO SUB 7700
-7660 NEXT d
-7670 GO TO 7570
+7660 NEXT d: GO TO 7570
 7710 IF nextX < 1 OR nextX > bSize OR nextY < 1 OR nextY > bSize THEN RETURN
 7720 IF b(nextX, nextY) = 1 THEN LET touchesBlack = 1: RETURN
 7730 IF b(nextX, nextY) = 2 THEN LET touchesWhite = 1: RETURN
-7740 IF v(nextX, nextY) = 1 THEN RETURN
-7750 LET v(nextX, nextY) = 1
-7760 LET stackPtr = stackPtr + 1
-7770 LET q(stackPtr) = nextX: LET w(stackPtr) = nextY
-7780 RETURN
-7810 LET owner = 0
-7820 IF touchesBlack = 1 AND touchesWhite = 0 THEN LET owner = 1
+7740 IF v(nextX, nextY) = curGen THEN RETURN
+7750 LET v(nextX, nextY) = curGen: LET stackPtr = stackPtr + 1: LET q(stackPtr) = nextX: LET w(stackPtr) = nextY: RETURN
+7810 LET owner = 0: IF touchesBlack = 1 AND touchesWhite = 0 THEN LET owner = 1
 7830 IF touchesWhite = 1 AND touchesBlack = 0 THEN LET owner = 2
 7840 IF owner = 0 THEN RETURN
-7850 IF owner = 1 THEN LET blackTerritory = blackTerritory + regionSize: LET c = 2
-7860 IF owner = 2 THEN LET whiteTerritory = whiteTerritory + regionSize: LET c = 4
-7880 FOR i = 1 TO regionSize
-7890 LET screenX = l(i) * 3 + f - 2
-7900 LET screenY = t(i) * 2 + yOffset
-7910 PRINT AT screenY, screenX; INK c; "+";
-7920 NEXT i
-7930 PRINT INK 0;
-7940 RETURN
+7850 IF owner = 1 THEN LET blackTerritory = blackTerritory + regionSize: LET col = 0
+7860 IF owner = 2 THEN LET whiteTerritory = whiteTerritory + regionSize: LET col = 1
+7880 FOR i = 1 TO regionSize: PRINT AT t(i)*2+yOffset, l(i)*3+f-2; INK col; ".";: NEXT i: RETURN
+
+9000 REM UDG Definition for Stone
+9010 FOR n = 0 TO 7: READ a: POKE USR "a" + n, a: NEXT n
+9020 DATA 60, 126, 255, 255, 255, 255, 126, 60
+9030 RETURN
